@@ -631,27 +631,6 @@ body::before {
           <button class="tb tb-t" style="width:100%" onclick="saveCostSettings()">💾 حفظ الإعدادات</button>
         </div>
       </div>
-      <!-- مرتبات المراتب -->
-      <div style="border-top:1px solid rgba(255,255,255,.07);margin-top:14px;padding-top:12px">
-        <div style="font-size:11px;color:#8a9ab8;margin-bottom:8px;font-weight:600">💼 مرتب كل مرتبة (ج.م/شهر)</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-          <div>
-            <label style="display:block;font-size:11px;color:#ffd700;margin-bottom:4px">🥇 رخصة أولى</label>
-            <input id="grade-sal-1" type="number" min="0" step="100" value="9000" class="fsel" style="width:100%" oninput="applyGradeSalaries()">
-          </div>
-          <div>
-            <label style="display:block;font-size:11px;color:#4fb3ff;margin-bottom:4px">🥈 رخصة ثانية</label>
-            <input id="grade-sal-2" type="number" min="0" step="100" value="8000" class="fsel" style="width:100%" oninput="applyGradeSalaries()">
-          </div>
-          <div>
-            <label style="display:block;font-size:11px;color:#00d4aa;margin-bottom:4px">🥉 رخصة ثالثة</label>
-            <input id="grade-sal-3" type="number" min="0" step="100" value="7000" class="fsel" style="width:100%" oninput="applyGradeSalaries()">
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="tb" style="width:100%;background:rgba(0,212,170,.15);border:1px solid rgba(0,212,170,.4);color:#00d4aa" onclick="saveGradeSalaries()">💾 حفظ المرتبات</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- KPIs -->
@@ -678,33 +657,6 @@ body::before {
       <div id="msg-log" style="margin-top:10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
-    <!-- بانيل تحديد حد السرعة -->
-    <div class="card" style="border-color:rgba(255,173,51,.35);background:rgba(255,173,51,.03)">
-      <div class="ct" style="color:#ffad33">🚦 تحديد حد السرعة للأسطول</div>
-      <!-- الحد العام -->
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:11px;color:#8a9ab8;margin-bottom:6px">⚡ الحد العام لكل الأسطول (كم/س)</label>
-        <div style="display:flex;gap:10px;align-items:center">
-          <input id="global-speed-inp" type="number" min="40" max="200" step="5" value="80" class="fsel" style="width:110px">
-          <button class="tb" style="background:rgba(255,173,51,.2);border:1px solid rgba(255,173,51,.5);color:#ffad33;padding:8px 16px;white-space:nowrap" onclick="sendGlobalSpeedLimit()">📡 إرسال للكل</button>
-          <span id="global-speed-status" style="font-size:11px;color:#8a9ab8"></span>
-        </div>
-      </div>
-      <!-- الحد لعربية محددة -->
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
-        <label style="display:block;font-size:11px;color:#8a9ab8;margin-bottom:6px">🚚 تغيير الحد لعربية معينة</label>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="speed-truck-sel" class="fsel" style="flex:1;min-width:160px">
-            <option value="">— اختر العربية —</option>
-          </select>
-          <input id="truck-speed-inp" type="number" min="40" max="200" step="5" value="80" class="fsel" style="width:90px">
-          <button class="tb" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.4);color:#a78bfa;padding:8px 14px;white-space:nowrap" onclick="sendTruckSpeedLimit()">📡 إرسال</button>
-        </div>
-      </div>
-      <!-- سجل التغييرات -->
-      <div id="speed-log" style="margin-top:10px;max-height:100px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
-    </div>
-
     <!-- الخريطة -->
     <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(139,92,246,.3);height:60vh;min-height:400px;position:relative" id="map-container">
       <div id="map-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0d1422;z-index:10;border-radius:12px">
@@ -719,14 +671,6 @@ body::before {
     <div>
       <div class="sec">💰 تكلفة الرحلة الحالية لكل عربية</div>
       <div id="live-cost-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
-    </div>
-
-    <!-- لوحة المخالفات والخصومات -->
-    <div>
-      <div class="sec" style="color:#ff6b6b">🚨 مخالفات السرعة والخصومات <span style="font-size:10px;color:#4a5670;font-weight:400;text-transform:none;letter-spacing:0">— يتحدث تلقائياً</span></div>
-      <div id="violations-panel">
-        <div style="color:#4a5670;font-size:13px;padding:16px;text-align:center">لا توجد مخالفات مسجلة</div>
-      </div>
     </div>
 
     <!-- تقرير تكلفة الكيلومتر -->
@@ -771,17 +715,6 @@ body::before {
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
-<!-- إشعار مخالفة السرعة للمدير -->
-<div id="manager-viol-alert" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99998;pointer-events:none">
-  <div id="manager-viol-inner" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);padding:14px 20px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.8);border-bottom:2px solid #f87171;pointer-events:all;position:relative">
-    <div style="font-size:11px;color:rgba(255,255,255,.8);margin-bottom:4px;letter-spacing:1px">🚨 تنبيه مخالفة سرعة</div>
-    <div id="viol-alert-text" style="font-size:16px;font-weight:700;color:#fff;line-height:1.5"></div>
-    <div id="viol-deduct-text" style="font-size:14px;font-weight:700;color:#ffd700;margin-top:4px"></div>
-    <button onclick="document.getElementById('manager-viol-alert').style.display='none'" style="position:absolute;top:10px;left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:15px;cursor:pointer;border-radius:6px;padding:2px 9px;line-height:1.4">✕</button>
-  </div>
-</div>
-
 
 <!-- GitHub Upload Modal -->
 <div id="github-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(8,12,20,.95);align-items:center;justify-content:center">
@@ -2808,33 +2741,80 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 // =========================================
 // ✏️ غيّر كلمة مرور الـ Admin هنا:
 var _ADMIN_PASS = 'omar2025';
-// =========================================
+// ========= USER MANAGEMENT — Firebase =========
 var _currentUser = null;
-function _getUsers(){
-  try{var s=localStorage.getItem('flt_users');if(s){var u=JSON.parse(s);if(u&&u.length)return u;}}catch(e){}
-  return [{username:'admin',password:_ADMIN_PASS,role:'admin'}];
-}
-function _saveUsers(u){try{localStorage.setItem('flt_users',JSON.stringify(u));}catch(e){}}
+var _FB_USERS = FB_URL + '/fleet_users';
+
 function _getSession(){try{return JSON.parse(sessionStorage.getItem('flt_sess')||'null');}catch(e){return null;}}
 function _setSession(u){try{sessionStorage.setItem('flt_sess',JSON.stringify(u));}catch(e){}}
+function _clearSession(){try{sessionStorage.removeItem('flt_sess');}catch(e){}}
+
+// جيب المستخدمين من Firebase
+function _fetchUsers(cb){
+  fetch(_FB_USERS+'.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var users=[];
+      if(data&&typeof data==='object'){
+        Object.keys(data).forEach(function(k){
+          if(data[k])users.push(Object.assign({},data[k],{_key:k}));
+        });
+      }
+      // لو Firebase فاضي — أنشئ admin افتراضي
+      if(!users.length){
+        var adminObj={username:'admin',password:_ADMIN_PASS,role:'admin'};
+        fetch(_FB_USERS+'.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(adminObj)})
+          .then(function(r){return r.json();})
+          .then(function(res){adminObj._key=res.name;users=[adminObj];cb(users);})
+          .catch(function(){cb([adminObj]);});
+      } else {
+        cb(users);
+      }
+    })
+    .catch(function(){
+      // Fallback لو Firebase فشل
+      cb([{username:'admin',password:_ADMIN_PASS,role:'admin'}]);
+    });
+}
+
+// إضافة مستخدم لـ Firebase
+function _addUserFB(userObj,cb){
+  fetch(_FB_USERS+'.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(userObj)})
+    .then(function(r){return r.json();})
+    .then(function(res){if(cb)cb(res.name);})
+    .catch(function(){if(cb)cb(null);});
+}
+
+// حذف مستخدم من Firebase
+function _delUserFB(key,cb){
+  fetch(_FB_USERS+'/'+key+'.json',{method:'DELETE'})
+    .then(function(){if(cb)cb();})
+    .catch(function(){if(cb)cb();});
+}
 
 function doLogin(){
-  var u=(document.getElementById('l-user').value||'').trim();
+  var u=(document.getElementById('l-user').value||'').trim().toLowerCase();
   var p=(document.getElementById('l-pass').value||'');
   var err=document.getElementById('l-err');
+  var btn=document.querySelector('#login-overlay button');
   err.style.display='none';
-  var found=_getUsers().find(function(x){return x.username===u&&x.password===p;});
-  if(found){
-    _currentUser=found;
-    _setSession(found);
-    document.getElementById('login-overlay').style.display='none';
-    document.getElementById('ub-name').textContent=found.username+' ('+(found.role==='admin'?'مدير':'مستخدم')+')';
-    applyRoleRestrictions(found.role);
-  } else {
-    err.style.display='block';
-    document.getElementById('l-pass').value='';
-  }
+  if(btn){btn.textContent='جاري التحقق...';btn.disabled=true;}
+  _fetchUsers(function(users){
+    if(btn){btn.textContent='دخول';btn.disabled=false;}
+    var found=users.find(function(x){return x.username.toLowerCase()===u&&x.password===p;});
+    if(found){
+      _currentUser=found;
+      _setSession(found);
+      document.getElementById('login-overlay').style.display='none';
+      document.getElementById('ub-name').textContent=found.username+' ('+(found.role==='admin'?'مدير':'مستخدم')+')';
+      applyRoleRestrictions(found.role);
+    } else {
+      err.style.display='block';
+      document.getElementById('l-pass').value='';
+    }
+  });
 }
+
 function applyRoleRestrictions(role){
   if(role!=='admin'){
     document.querySelectorAll('.ro-hide').forEach(function(el){el.style.setProperty('display','none','important');});
@@ -2846,54 +2826,85 @@ function applyRoleRestrictions(role){
     });
   }
 }
+
 function openUmgr(){
   if(!_currentUser||_currentUser.role!=='admin'){toast('⚠️ صلاحية Admin فقط');return;}
   renderUmgr();
   document.getElementById('umgr').classList.remove('hidden');
 }
+
 function renderUmgr(){
-  var users=_getUsers();
   var tb=document.getElementById('um-tbody');
-  tb.innerHTML='';
-  users.forEach(function(u,i){
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+u.username+'</td><td><span class="badge-'+u.role+'">'+u.role+'</span></td>'
-      +'<td style="text-align:center"><button onclick="umDel('+i+')" class="delbtn">✕</button></td>';
-    tb.appendChild(tr);
+  tb.innerHTML='<tr><td colspan="3" style="text-align:center;color:#8a9ab8;padding:10px">جاري التحميل...</td></tr>';
+  _fetchUsers(function(users){
+    tb.innerHTML='';
+    users.forEach(function(u){
+      var tr=document.createElement('tr');
+      var isMe=u.username===(_currentUser&&_currentUser.username);
+      tr.innerHTML='<td><strong>'+u.username+'</strong></td>'
+        +'<td><span class="badge-'+u.role+'">'+u.role+'</span></td>'
+        +'<td style="text-align:center">'
+        +(isMe?'<span style="color:#4a5670;font-size:11px">أنت</span>'
+               :'<button onclick="umDel(\''+u._key+'\',\''+u.username+'\')" class="delbtn">✕</button>')
+        +'</td>';
+      tb.appendChild(tr);
+    });
+    if(!users.length)tb.innerHTML='<tr><td colspan="3" style="text-align:center;color:#4a5670;padding:10px">لا يوجد مستخدمين</td></tr>';
   });
 }
+
 function umAdd(){
   var u=(document.getElementById('um-user').value||'').trim();
   var p=(document.getElementById('um-pass').value||'');
   var r=document.getElementById('um-role').value;
   if(!u||!p){toast('⚠️ ادخل اسم المستخدم وكلمة المرور');return;}
-  var users=_getUsers();
-  if(users.find(function(x){return x.username===u;})){toast('⚠️ الاسم ده موجود');return;}
-  users.push({username:u,password:p,role:r});
-  _saveUsers(users);
-  document.getElementById('um-user').value='';
-  document.getElementById('um-pass').value='';
-  renderUmgr();
-  toast('✅ تم إضافة: '+u);
+  // تحقق مش موجود
+  _fetchUsers(function(users){
+    if(users.find(function(x){return x.username.toLowerCase()===u.toLowerCase();})){
+      toast('⚠️ الاسم ده موجود');return;
+    }
+    _addUserFB({username:u,password:p,role:r},function(key){
+      if(key){
+        document.getElementById('um-user').value='';
+        document.getElementById('um-pass').value='';
+        renderUmgr();
+        toast('✅ تم إضافة: '+u+' — هيقدر يدخل من أي جهاز دلوقتي');
+      } else {
+        toast('⚠️ فشل الإضافة، تحقق من الاتصال');
+      }
+    });
+  });
 }
-function umDel(i){
-  var users=_getUsers();
-  if(users[i]&&users[i].username===(_currentUser&&_currentUser.username)){toast('⚠️ مش هتقدر تحذف نفسك');return;}
-  users.splice(i,1);
-  _saveUsers(users);
-  renderUmgr();
-  toast('تم الحذف');
+
+function umDel(key,username){
+  if(!key){toast('⚠️ خطأ في الحذف');return;}
+  if(username===(_currentUser&&_currentUser.username)){toast('⚠️ مش هتقدر تحذف نفسك');return;}
+  _delUserFB(key,function(){
+    renderUmgr();
+    toast('✅ تم حذف: '+username);
+  });
 }
-// Auto-login from session
+
+// Auto-login من الـ session
 (function(){
   var s=_getSession();
   if(s){
-    _currentUser=s;
-    document.getElementById('login-overlay').style.display='none';
-    document.getElementById('ub-name').textContent=s.username+' ('+(s.role==='admin'?'مدير':'مستخدم')+')';
-    applyRoleRestrictions(s.role);
+    // تحقق إن اليوزر لسه موجود في Firebase
+    _fetchUsers(function(users){
+      var stillValid=users.find(function(x){return x.username===s.username&&x.password===s.password;});
+      if(stillValid){
+        _currentUser=stillValid;
+        document.getElementById('login-overlay').style.display='none';
+        document.getElementById('ub-name').textContent=stillValid.username+' ('+(stillValid.role==='admin'?'مدير':'مستخدم')+')';
+        applyRoleRestrictions(stillValid.role);
+      } else {
+        // اليوزر اتحذف — سجّل خروج
+        _clearSession();
+      }
+    });
   }
 })();
+// ========= END USER MANAGEMENT =========
 
 
 function openCostAnalysis(){
@@ -3553,40 +3564,6 @@ function renderCostAnalysis(){
     };
   }
 
-  function loadGradeSalaries(){
-    try{
-      var s=JSON.parse(localStorage.getItem('fleet_gradeSalaries')||'{}');
-      if(s.sal1){document.getElementById('grade-sal-1').value=s.sal1;}
-      if(s.sal2){document.getElementById('grade-sal-2').value=s.sal2;}
-      if(s.sal3){document.getElementById('grade-sal-3').value=s.sal3;}
-      applyGradeSalaries();
-    }catch(_e){}
-  }
-
-  function applyGradeSalaries(){
-    var sal1=parseInt(document.getElementById('grade-sal-1').value)||9000;
-    var sal2=parseInt(document.getElementById('grade-sal-2').value)||8000;
-    var sal3=parseInt(document.getElementById('grade-sal-3').value)||7000;
-    // حدّث DRIVER_GRADES بالمرتبات الجديدة
-    Object.keys(DRIVER_GRADES).forEach(function(name){
-      var g=DRIVER_GRADES[name].grade;
-      if(g==='أولى') DRIVER_GRADES[name].salary=sal1;
-      else if(g==='ثانية') DRIVER_GRADES[name].salary=sal2;
-      else if(g==='ثالثة') DRIVER_GRADES[name].salary=sal3;
-    });
-  }
-
-  function saveGradeSalaries(){
-    var sal1=parseInt(document.getElementById('grade-sal-1').value)||9000;
-    var sal2=parseInt(document.getElementById('grade-sal-2').value)||8000;
-    var sal3=parseInt(document.getElementById('grade-sal-3').value)||7000;
-    try{
-      localStorage.setItem('fleet_gradeSalaries',JSON.stringify({sal1:sal1,sal2:sal2,sal3:sal3}));
-      applyGradeSalaries();
-      toast('✅ تم حفظ مرتبات المراتب');
-    }catch(_e){ toast('⚠️ تعذر الحفظ'); }
-  }
-
   // ---- Full trip cost = fuel + maintenance + driver time ----
   function calcTripFullCost(distanceKm, cons, fuelPriceOverride, durationHrs){
     var cp=getCostParams();
@@ -3603,7 +3580,6 @@ function renderCostAnalysis(){
 
   function openManagerMap(){
     loadCostSettings();
-    loadGradeSalaries();
     document.getElementById('mappage').classList.remove('hidden');
     setTimeout(function(){
       if(_managerMap)_managerMap.invalidateSize();
@@ -3617,120 +3593,22 @@ function renderCostAnalysis(){
     var st=document.getElementById('map-refresh-status');
     if(st)st.textContent='جاري التحديث...';
     Promise.all([
-      fetch(FB_URL+'/gps_positions.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
-      fetch(FB_URL+'/gps_trips.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
-      fetch(FB_URL+'/gps_violations_latest.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
-      fetch(FB_URL+'/gps_violations.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;})
+      fetch(FB_URL+'/gps_positions.json').then(function(r){return r.json();}).catch(function(){return null;}),
+      fetch(FB_URL+'/gps_trips.json').then(function(r){return r.json();}).catch(function(){return null;}),
+      fetch(FB_URL+'/gps_violations.json').then(function(r){return r.json();}).catch(function(){return null;})
     ]).then(function(results){
       _lastPositions=results[0]||{};
+      _lastViolations=results[2]||{};
       var tripsObj=results[1]||{};
-      var latestViol=results[2]||{};
-      var allViolObj=results[3]||{};
-      _lastViolations=latestViol;
-      _allViolations=Array.isArray(allViolObj)?allViolObj:Object.values(allViolObj);
       _lastTrips=Object.values(tripsObj).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-      // تنبيه المدير بصوت + هزاز لو في مخالفة جديدة (خلال آخر 20 ثانية)
-      var now30=Date.now();
-      Object.keys(latestViol).forEach(function(tk){
-        var v=latestViol[tk];
-        if(!v||!v.ts)return;
-        if(now30-v.ts<20000&&!_notifiedViolTs[tk+'_'+v.ts]){
-          _notifiedViolTs[tk+'_'+v.ts]=true;
-          playManagerBeep('viol');
-          // نظّف القديم
-          var keys=Object.keys(_notifiedViolTs);
-          if(keys.length>200)keys.slice(0,100).forEach(function(k){delete _notifiedViolTs[k];});
-          // إشعار بنافذة الخصم
-          var driverLabel=(v.driverName||v.truck||tk);
-          var deductTxt=v.violCount>=3?'🚨 خصم 3 أيام تلقائي!':(v.violCount===2?'⚠️ خصم نص يوم':'⚠️ تحذير أول');
-          showManagerViolAlert(driverLabel,v.speed,v.limit,v.violCount,deductTxt);
-        }
-      });
       renderLiveMap(_lastPositions,_lastViolations);
       renderFirebaseTrips(tripsObj);
       renderLiveCostCards(_lastPositions);
       renderKmCostTable(_lastTrips);
       renderFuelCompareChart(_lastTrips);
-      renderViolationsPanel(_allViolations,_lastViolations);
       buildMsgTruckList();
-      buildSpeedTruckList();
       if(st)st.textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     }).catch(function(){if(st)st.textContent='⚠️ تعذر التحديث';});
-  }
-
-  function showManagerViolAlert(driver, speed, limit, count, deductTxt){
-    var el=document.getElementById('manager-viol-alert');
-    var txt=document.getElementById('viol-alert-text');
-    var dtxt=document.getElementById('viol-deduct-text');
-    if(!el||!txt||!dtxt)return;
-    txt.textContent='السائق: '+driver+' — السرعة: '+speed+' كم/س (الحد: '+limit+' كم/س) | مخالفة رقم '+count;
-    dtxt.textContent=deductTxt;
-    el.style.display='block';
-    setTimeout(function(){if(el)el.style.display='none';},12000);
-  }
-
-  // ==================== تنبيه صوتي + هزاز للمدير ====================
-  function playManagerBeep(type){
-    try{
-      var ctx=new(window.AudioContext||window.webkitAudioContext)();
-      var patterns=type==='viol'?[880,660,880,440,880]:(type==='msg'?[523,659,784,659]:[440,440]);
-      var t=ctx.currentTime;
-      patterns.forEach(function(f,i){
-        var o=ctx.createOscillator(),g=ctx.createGain();
-        o.connect(g);g.connect(ctx.destination);
-        o.frequency.value=f;o.type='sine';
-        g.gain.setValueAtTime(0,t+i*0.18);
-        g.gain.linearRampToValueAtTime(0.7,t+i*0.18+0.05);
-        g.gain.linearRampToValueAtTime(0,t+i*0.18+0.15);
-        o.start(t+i*0.18);o.stop(t+i*0.18+0.2);
-      });
-    }catch(_e){}
-    try{
-      if(navigator.vibrate){
-        if(type==='viol') navigator.vibrate([600,200,600,200,600,200,600]);
-        else navigator.vibrate([400,150,400,150,400]);
-      }
-    }catch(_e){}
-  }
-
-  // متغيرات مخالفات
-  var _allViolations=[];
-  var _notifiedViolTs={}; // تتبع المخالفات اللي اتعمل لها تنبيه عشان منكررش
-
-  // لوحة المخالفات والخصومات للمدير
-  function renderViolationsPanel(allViols, latestViols){
-    var el=document.getElementById('violations-panel');
-    if(!el)return;
-    allViols=allViols||[];latestViols=latestViols||{};
-    // تجميع حسب العربية
-    var byTruck={};
-    allViols.forEach(function(v){
-      var tk=v.truck||v.truckType||'غير معروف';
-      if(!byTruck[tk])byTruck[tk]={truck:tk,driver:v.driverName||'',viols:[],maxViolCount:0};
-      byTruck[tk].viols.push(v);
-      if((v.violCount||1)>byTruck[tk].maxViolCount)byTruck[tk].maxViolCount=v.violCount||1;
-    });
-    var sorted=Object.values(byTruck).sort(function(a,b){return b.viols.length-a.viols.length;});
-    if(!sorted.length){el.innerHTML='<div style="color:#4a5670;font-size:13px;padding:16px;text-align:center">لا توجد مخالفات مسجلة</div>';return;}
-    el.innerHTML=sorted.map(function(tb){
-      var deductColor=tb.maxViolCount>=3?'#ff4444':(tb.maxViolCount===2?'#ffd700':'#8a9ab8');
-      var deductText=tb.maxViolCount>=3?'خصم 3 أيام 🚨':(tb.maxViolCount===2?'خصم نص يوم ⚠️':'تحذير فقط');
-      var latest=latestViols[tb.truck.replace(/[^a-zA-Z0-9_]/g,'_')]||{};
-      var isRecent=latest.ts&&(Date.now()-latest.ts<300000);
-      return '<div style="background:#111827;border:1px solid '+(isRecent?'rgba(255,68,68,.5)':'rgba(255,255,255,.07)')+';border-radius:10px;padding:12px 14px;margin-bottom:8px">'+
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
-          '<div style="font-size:15px;font-weight:700;color:#22d3ee;flex:1">🚚 '+escHtml(tb.truck)+(tb.driver?'<span style="color:#ffad33;font-size:12px;margin-right:8px"> | '+escHtml(tb.driver)+'</span>':'')+'</div>'+
-          '<span style="background:'+deductColor+'22;border:1px solid '+deductColor+';border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:'+deductColor+'">'+deductText+'</span>'+
-          (isRecent?'<span style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);border-radius:6px;padding:3px 8px;font-size:11px;color:#ff6b6b">🔴 الآن</span>':'')+
-        '</div>'+
-        '<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">'+
-          '<span style="font-size:12px;color:#8a9ab8">🚨 عدد المخالفات: <b style="color:#ff6b6b">'+tb.viols.length+'</b></span>'+
-          (latest.speed?'<span style="font-size:12px;color:#8a9ab8">📍 آخر سرعة: <b style="color:#ffd700">'+latest.speed+' كم/س</b></span>':'')+
-          (latest.limit?'<span style="font-size:12px;color:#8a9ab8">🚦 الحد: <b style="color:#4fb3ff">'+latest.limit+' كم/س</b></span>':'')+
-          (latest.ts?'<span style="font-size:12px;color:#4a5670">'+new Date(latest.ts).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})+'</span>':'')+
-        '</div>'+
-      '</div>';
-    }).join('');
   }
 
   function recomputeLiveCosts(){
@@ -3959,60 +3837,15 @@ function renderCostAnalysis(){
   // ---- Export functions ----
   function exportTripsCSV(){
     var cp=getCostParams();
-    // تحويل الأرقام العربية لإنجليزية وإزالة الحروف الخفية
-    function cleanCell(v){
-      var s=String(v===null||v===undefined?'':v);
-      var ar='٠١٢٣٤٥٦٧٨٩';
-      for(var i=0;i<10;i++)s=s.split(ar[i]).join(String(i));
-      s=s.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069\u200b]/g,'').trim();
-      return s;
-    }
-    // تحويل timestamp لتاريخ إنجليزي
-    function tsToDate(ts){
-      if(!ts)return '';
-      var d=new Date(ts);
-      return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
-    }
-    function tsToTime(ts){
-      if(!ts)return '';
-      var d=new Date(ts);
-      var h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
-      return h+':'+m+(h>=12?' م':' ص');
-    }
-    // دالة تلف الخلية لو فيها فاصلة
-    function wrapCell(v){
-      v=cleanCell(v);
-      if(v.indexOf(',')>-1||v.indexOf('"')>-1)v='"'+v.replace(/"/g,'""')+'"';
-      return v;
-    }
-
-    var headers=['العربية','النوع','السائق','التاريخ','من','إلى','المسافة (كم)','الاستهلاك (كم/لتر)','سعر الوقود','تكلفة الوقود (ج.م)','تكلفة الصيانة (ج.م)','إجمالي التكلفة (ج.م)','ج.م/كم'];
-    var rows=[headers.map(wrapCell)];
-
+    var rows=[['العربية','النوع','التاريخ','من','إلى','المسافة (كم)','الاستهلاك','سعر الوقود','تكلفة الوقود','تكلفة الصيانة','إجمالي التكلفة','ج.م/كم']];
     _lastTrips.forEach(function(t){
-      var dist=t.distanceKm||0;
-      var fp=t.fuelPrice||cp.fuelPrice;
-      var cons=t.cons||9;
+      var dist=t.distanceKm||0;var fp=t.fuelPrice||cp.fuelPrice;var cons=t.cons||9;
       var costs=calcTripFullCost(dist,cons,fp,0);
-      // التاريخ والوقت — إما من startTime أو من date/startLabel
-      var dateStr=t.startTime?tsToDate(t.startTime):cleanCell(t.date||'');
-      var startStr=t.startTime?tsToTime(t.startTime):cleanCell(t.startLabel||t.start||'');
-      var endStr=t.endTime?tsToTime(t.endTime):cleanCell(t.endLabel||t.end||'');
-      rows.push([
-        t.truck||'', t.truckType||'', t.driverName||'',
-        dateStr, startStr, endStr,
-        dist.toFixed(2), cons, fp,
-        costs.fuelCost.toFixed(2), costs.maintCost.toFixed(2), costs.total.toFixed(2),
-        dist>0?(costs.total/dist).toFixed(2):''
-      ].map(wrapCell));
+      rows.push([t.truck||'',t.truckType||'',t.date||'',(t.startLabel||t.start||''),(t.endLabel||t.end||''),dist.toFixed(2),cons,fp,costs.fuelCost.toFixed(2),costs.maintCost.toFixed(2),costs.total.toFixed(2),(dist>0?(costs.total/dist).toFixed(2):'')]);
     });
-
-    var csv=rows.map(function(r){return r.join(',');}).join('\r\n');
+    var csv=rows.map(function(r){return r.join(',');}).join('\n');
     var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='fleet_trips_'+new Date().toISOString().slice(0,10)+'.csv';
-    a.click();
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fleet_trips_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
     toast('✅ تم تصدير CSV');
   }
 
@@ -4118,88 +3951,6 @@ function renderCostAnalysis(){
     }).join('');
   }
   // ==================== END DRIVER MESSAGING ====================
-
-  // ==================== SPEED LIMIT CONTROL ====================
-  var _speedLog = [];
-
-  function buildSpeedTruckList(){
-    var sel = document.getElementById('speed-truck-sel');
-    if(!sel) return;
-    sel.innerHTML = '<option value="">— اختر العربية —</option>';
-    // من الـ positions الحية أولاً
-    Object.keys(_lastPositions).forEach(function(key){
-      var p = _lastPositions[key];
-      if(!p) return;
-      var o = document.createElement('option');
-      o.value = key;
-      o.textContent = (p.truck||key) + (p.driverName?' — '+p.driverName:'');
-      sel.appendChild(o);
-    });
-    // باقي العربيات من TRUCKS
-    if(typeof TRUCKS !== 'undefined'){
-      TRUCKS.forEach(function(t){
-        var key = String(t.T).replace(/[^a-zA-Z0-9_]/g,'_');
-        if(_lastPositions[key]) return;
-        var o = document.createElement('option');
-        o.value = key;
-        o.textContent = t.T + ' — ' + (t.TT||'');
-        sel.appendChild(o);
-      });
-    }
-  }
-
-  function sendGlobalSpeedLimit(){
-    var limit = parseInt(document.getElementById('global-speed-inp').value);
-    if(!limit||limit<40||limit>200){ toast('⚠️ حد السرعة لازم يكون بين 40 و 200'); return; }
-    var payload = { maxSpeed: limit, ts: Date.now(), from: 'manager' };
-    // بعت للكل عن طريق broadcast
-    fetch(FB_URL+'/driver_commands/broadcast.json',{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    }).then(function(){
-      addSpeedLog('📢 الكل', limit, true);
-      document.getElementById('global-speed-status').textContent = '✅ تم الإرسال';
-      setTimeout(function(){ document.getElementById('global-speed-status').textContent=''; },3000);
-      toast('✅ تم إرسال حد '+limit+' كم/س لكل الأسطول');
-    }).catch(function(){
-      toast('⚠️ فشل الإرسال');
-    });
-  }
-
-  function sendTruckSpeedLimit(){
-    var truckKey = document.getElementById('speed-truck-sel').value;
-    var limit = parseInt(document.getElementById('truck-speed-inp').value);
-    if(!truckKey){ toast('⚠️ اختر العربية الأول'); return; }
-    if(!limit||limit<40||limit>200){ toast('⚠️ حد السرعة لازم يكون بين 40 و 200'); return; }
-    var payload = { maxSpeed: limit, ts: Date.now(), from: 'manager' };
-    fetch(FB_URL+'/driver_commands/'+truckKey+'.json',{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    }).then(function(){
-      var label = document.getElementById('speed-truck-sel').options[document.getElementById('speed-truck-sel').selectedIndex].textContent;
-      addSpeedLog('🚚 '+label, limit, true);
-      toast('✅ تم إرسال حد '+limit+' كم/س للعربية');
-    }).catch(function(){
-      toast('⚠️ فشل الإرسال');
-    });
-  }
-
-  function addSpeedLog(to, limit, sent){
-    _speedLog.unshift({ to:to, limit:limit, sent:sent, time:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}) });
-    var el = document.getElementById('speed-log');
-    if(!el) return;
-    el.innerHTML = _speedLog.slice(0,8).map(function(m){
-      return '<div style="background:#0d1422;border-radius:6px;padding:5px 10px;font-size:11px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;gap:8px">'+
-        '<span><span style="color:#ffad33;margin-left:6px">'+escHtml(m.to)+'</span><span style="color:#e8edf5">حد '+m.limit+' كم/س</span></span>'+
-        '<span style="color:#4a5670;font-size:10px;white-space:nowrap">'+m.time+'</span>'+
-      '</div>';
-    }).join('');
-  }
-  // ==================== END SPEED LIMIT CONTROL ====================
-
-
 
   function loadAllSavedData(){
     if(READONLY)return;
