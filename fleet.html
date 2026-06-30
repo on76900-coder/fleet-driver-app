@@ -242,7 +242,7 @@ body::before {
   <button class="tb ro-hide" style="background:rgba(180,100,255,.15);border:1px solid rgba(180,100,255,.45);color:#c084fc" onclick="openMonthCompare()">📊 مقارنة الشهور</button>
   <button class="tb ro-hide" style="background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.4);color:#00d4aa" onclick="openStandards()">⚙️ معايير العربيات</button>
   <button class="tb" style="background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);color:#22d3ee" onclick="openGps()">📍 GPS تتبع حي</button>
-  <button class="tb ro-hide" style="background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);color:#a78bfa" onclick="openManagerMap()" id="map-nav-btn">🗺️ خريطة مباشرة</button>
+  <button class="tb" style="background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);color:#a78bfa" onclick="openManagerMap()" id="map-nav-btn">🗺️ خريطة مباشرة</button>
   <button class="tb tb-b" onclick="openEd()">✏️ تعديل</button>
   <button class="tb tb-o" onclick="uploadXL()">📂 رفع Excel</button>
   <input type="file" id="xlf" accept=".xlsx,.xls" style="display:none" onchange="handleXL(event)">
@@ -747,7 +747,7 @@ var FB_URL='https://fleet-gps-65162-default-rtdb.firebaseio.com';
 if(DRIVER_MODE){
   // أخفي كل حقول التكلفة فورًا بـ CSS قبل ما الصفحة ترسم أي حاجة
   var _driverStyle=document.createElement('style');
-  _driverStyle.textContent='#gps-cons-field,#gps-price-field,#gps-live-cost-box,#gps-th-cons,#gps-th-price,#gps-th-cost,#gps-summary-kpis,#map-nav-btn{display:none!important}';
+  _driverStyle.textContent='#gps-cons-field,#gps-price-field,#gps-live-cost-box,#gps-th-cons,#gps-th-price,#gps-th-cost,#gps-summary-kpis{display:none!important}';
   document.head.appendChild(_driverStyle);
   try{
     var _lo=document.getElementById('login-overlay');if(_lo)_lo.style.display='none';
