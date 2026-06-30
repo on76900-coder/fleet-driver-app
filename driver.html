@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>🚚 تتبع الرحلة</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080c14;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;padding:16px;padding-bottom:40px}
+.card{background:#0f1520;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:14px}
+.title{text-align:center;font-size:22px;font-weight:800;color:#22d3ee;padding:20px 0 4px}
+.subtitle{text-align:center;font-size:12px;color:#8a9ab8;margin-bottom:20px}
+label{display:block;font-size:12px;color:#8a9ab8;margin-bottom:6px;font-weight:600}
+select,input[type=text]{width:100%;background:#080c14;border:1px solid rgba(255,255,255,.14);border-radius:8px;color:#e2e8f0;padding:12px 14px;font-size:15px;font-family:inherit}
+select:focus,input:focus{outline:none;border-color:#22d3ee}
+.btn{width:100%;padding:15px;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px}
+.btn-start{background:linear-gradient(135deg,#00d4aa,#00897b);color:#080c14}
+.btn-stop{background:linear-gradient(135deg,#ff4444,#cc2222);color:white}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.kpi{background:#080c14;border-radius:10px;padding:14px;text-align:center}
+.kv{font-size:26px;font-weight:700;margin-bottom:4px}
+.kl{font-size:11px;color:#8a9ab8}
+.err{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#ff8888;margin-top:10px;display:none}
+.dot{width:10px;height:10px;border-radius:50%;background:#00d4aa;display:inline-block;margin-left:6px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.log-item{background:#080c14;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;border:1px solid rgba(255,255,255,.06)}
+.loading{text-align:center;color:#8a9ab8;padding:20px;font-size:13px}
+.hidden{display:none!important}
+.field{margin-bottom:14px}
+/* رسالة المدير */
+#manager-msg{display:none;position:fixed;top:0;left:0;right:0;z-index:9998}
+.msg-inner{background:linear-gradient(135deg,#7c2d12,#c2410c);padding:16px 40px 16px 16px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.7);position:relative;border-bottom:2px solid #fb923c}
+.msg-label{font-size:11px;color:rgba(255,255,255,.7);margin-bottom:4px;letter-spacing:1px}
+.msg-text{font-size:17px;font-weight:700;color:#fff;line-height:1.4}
+.msg-close{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:16px;cursor:pointer;border-radius:6px;padding:2px 8px;line-height:1.4}
+/* تنبيه سرعة */
+#speed-alert{display:none;position:fixed;inset:0;z-index:9999;background:rgba(200,0,0,.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer}
+#speed-alert.show{display:flex;animation:flash .5s infinite}
+@keyframes flash{0%,100%{background:rgba(200,0,0,.95)}50%{background:rgba(255,50,50,1)}}
+.alert-icon{font-size:72px;animation:bounce .5s infinite alternate}
+@keyframes bounce{to{transform:scale(1.15)}}
+.alert-speed{font-size:52px;font-weight:900;color:#fff;margin:8px 0}
+.alert-text{font-size:20px;color:rgba(255,255,255,.95);font-weight:700}
+.alert-sub{font-size:14px;color:rgba(255,255,255,.75);margin-top:6px}
+.alert-btn{margin-top:24px;background:rgba(255,255,255,.2);border:2px solid #fff;border-radius:10px;padding:12px 32px;color:#fff;font-size:15px;font-weight:700}
+/* شريط الرحلة المستمرة بعد الرفريش */
+#resume-banner{display:none;background:linear-gradient(135deg,#0c4a6e,#0369a1);border:1px solid #0ea5e9;border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="speed-alert" onclick="dismissAlert()">
+  <div class="alert-icon">🚨</div>
+  <div class="alert-speed" id="alert-spd"></div>
+  <div class="alert-text">تجاوزت الحد المسموح!</div>
+  <div class="alert-sub" id="alert-lim"></div>
+  <div id="alert-deduct-msg" style="font-size:14px;font-weight:700;color:#ffd700;margin:10px auto 4px;padding:8px 16px;background:rgba(0,0,0,.4);border-radius:8px;max-width:280px;line-height:1.5"></div>
+  <div class="alert-btn">اضغط للإغلاق</div>
+</div>
+
+<div id="manager-msg">
+  <div class="msg-inner">
+    <div class="msg-label">📨 رسالة من المدير</div>
+    <div class="msg-text" id="manager-msg-text"></div>
+    <button class="msg-close" onclick="dismissManagerMsg()">✕</button>
+  </div>
+</div>
+
+<div class="title">🚚 تتبع رحلتك</div>
+<div class="subtitle" id="subtitle">جاري التحميل...</div>
+
+<!-- بانر الرحلة المستمرة -->
+<div id="resume-banner" style="display:none;background:linear-gradient(135deg,#064e3b,#065f46);border:1px solid #10b981;border-radius:12px;padding:10px 16px;margin-bottom:14px;text-align:center;font-size:13px;color:#6ee7b7">
+  ✅ تم استئناف الرحلة تلقائياً
+</div>
+
+<div class="card" id="setup-card">
+  <div class="field">
+    <label>👤 اسمك</label>
+    <input id="driver-name-inp" type="text" placeholder="اكتب اسمك...">
+    <div id="name-saved" style="font-size:11px;color:#00d4aa;margin-top:5px;display:none">✅ محفوظ — غيره لو محتاج</div>
+  </div>
+  <div class="field">
+    <label>🚛 اختر عربيتك</label>
+    <select id="truck-sel"><option value="">جاري التحميل...</option></select>
+  </div>
+  <div id="err" class="err"></div>
+  <div id="start-wrap">
+    <button class="btn btn-start" onclick="startTrip()">▶️ ابدأ الرحلة</button>
+  </div>
+  <div id="stop-wrap" class="hidden">
+    <button class="btn btn-stop" onclick="stopTrip()">⏹️ إنهاء الرحلة</button>
+  </div>
+</div>
+
+<div class="card hidden" id="live-card" style="border-color:rgba(0,212,170,.4);background:rgba(0,212,170,.03)">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <span class="dot"></span>
+    <span style="font-size:14px;color:#00d4aa;font-weight:700" id="live-truck">—</span>
+  </div>
+  <div class="kgrid">
+    <div class="kpi"><div class="kv" id="live-dist" style="color:#22d3ee">0.00</div><div class="kl">كيلومتر</div></div>
+    <div class="kpi"><div class="kv" id="live-dur" style="color:#8a9ab8">00:00:00</div><div class="kl">مدة الرحلة</div></div>
+    <div class="kpi" style="grid-column:span 2">
+      <div class="kv" id="live-spd" style="color:#ffd700;font-size:34px">0 كم/س</div>
+      <div class="kl">السرعة الحالية</div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="history-card">
+  <div style="font-size:13px;color:#8a9ab8;font-weight:600;margin-bottom:10px">📋 رحلاتك السابقة</div>
+  <div id="history-list"><div class="loading">لسه مفيش رحلات</div></div>
+</div>
+
+<script>
+var FB='https://fleet-gps-65162-default-rtdb.firebaseio.com';
+var MAX_SPEED=(function(){var m=location.search.match(/[?&]maxspeed=([^&]+)/);return m?parseInt(m[1]):80;})();
+var TRUCK_LOCK=(function(){var m=location.search.match(/[?&]truck=([^&]+)/);return m?decodeURIComponent(m[1]):null;})();
+
+var TRUCKS=[];
+var state={
+  watchId:null,timer:null,uploadTimer:null,msgTimer:null,
+  points:[],dist:0,startTime:null,speed:0,
+  truck:null,tt:null,cons:9,driverName:'',
+  alertOn:false,lastViol:0,
+  violCount:0,       // ← عداد مخالفات السرعة في الرحلة
+  lastLat:null,lastLng:null,
+  active:false
+};
+var trips=[];
+try{var _t=localStorage.getItem('drv_trips');if(_t)trips=JSON.parse(_t);}catch(e){}
+
+// ============================================================
+// صوت التنبيه
+// ============================================================
+function playBeep(type){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var freqs=type==='speed'?[880,660,880]:(type==='msg'?[523,659,784]:[440]);
+    var t=ctx.currentTime;
+    freqs.forEach(function(f,i){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(0,t+i*0.18);
+      g.gain.linearRampToValueAtTime(0.6,t+i*0.18+0.05);
+      g.gain.linearRampToValueAtTime(0,t+i*0.18+0.15);
+      o.start(t+i*0.18);o.stop(t+i*0.18+0.18);
+    });
+  }catch(_e){}
+}
+
+// هزاز + صوت معاً
+function alertDriver(type){
+  playBeep(type);
+  try{
+    if(navigator.vibrate){
+      if(type==='speed') navigator.vibrate([600,200,600,200,600,200,600]);
+      else navigator.vibrate([400,150,400,150,400]);
+    }
+  }catch(_e){}
+}
+
+var FALLBACK_TRUCKS=[{"T":"1763","TT":"JMC","cons":9},{"T":"1983","TT":"JMC","cons":9},{"T":"1842","TT":"JMC","cons":9},{"T":"2718","TT":"Jumbo 1","cons":6.25},{"T":"1582","TT":"Canter O","cons":10.5},{"T":"1823","TT":"JMC","cons":9},{"T":"1516","TT":"Dababa","cons":10.5},{"T":"1597","TT":"Canter O","cons":10.5},{"T":"7956","TT":"Dababa","cons":10.5},{"T":"1985","TT":"JMC","cons":9},{"T":"1625","TT":"Canter O","cons":10.5},{"T":"1765","TT":"JMC","cons":9},{"T":"1579","TT":"Canter O","cons":10.5},{"T":"1798","TT":"JMC","cons":9},{"T":"1745","TT":"JMC","cons":9},{"T":"1837","TT":"JMC","cons":9},{"T":"1984","TT":"JMC","cons":9},{"T":"7544","TT":"DMax","cons":10.5},{"T":"1869","TT":"JMC","cons":9},{"T":"1586","TT":"Dababa","cons":10.5},{"T":"1596","TT":"Canter O","cons":10.5},{"T":"2897","TT":"Dababa","cons":10.5},{"T":"3179","TT":"Fiat","cons":9},{"T":"1839","TT":"JMC","cons":9},{"T":"1986","TT":"JMC","cons":9},{"T":"3184","TT":"Fiat","cons":9},{"T":"8493","TT":"Jumbo","cons":6.25},{"T":"1725","TT":"Canter C","cons":10.5}];
+
+// ============================================================
+// حفظ واسترجاع الرحلة من localStorage (للرفريش)
+// ============================================================
+function saveActiveTrip(){
+  if(!state.active)return;
+  try{
+    localStorage.setItem('drv_active',JSON.stringify({
+      truck:state.truck,tt:state.tt,cons:state.cons,
+      driverName:state.driverName,
+      startTime:state.startTime,
+      dist:state.dist,
+      violCount:state.violCount||0,
+      lastLat:state.lastLat,lastLng:state.lastLng
+    }));
+  }catch(_e){}
+}
+
+function clearActiveTrip(){
+  try{localStorage.removeItem('drv_active');}catch(_e){}
+}
+
+function checkSavedTrip(){
+  try{
+    var saved=localStorage.getItem('drv_active');
+    if(!saved)return;
+    var d=JSON.parse(saved);
+    if(!d||!d.truck||!d.startTime)return;
+    // تحقق إن الرحلة مش قديمة أكتر من 12 ساعة
+    if(Date.now()-d.startTime>43200000){clearActiveTrip();return;}
+    // استئناف تلقائي فوري بدون انتظار المستخدم
+    window._savedTrip=d;
+    resumeTrip();
+  }catch(_e){}
+}
+
+function resumeTrip(){
+  var d=window._savedTrip;
+  if(!d)return;
+  document.getElementById('resume-banner').style.display='none';
+  // استرجع الـ state
+  state.truck=d.truck;state.tt=d.tt;state.cons=d.cons;
+  state.driverName=d.driverName;state.startTime=d.startTime;
+  state.dist=d.dist||0;state.lastLat=d.lastLat;state.lastLng=d.lastLng;
+  state.violCount=d.violCount||0; // ← استرجع عداد المخالفات
+  state.active=true;state.alertOn=false;
+  // شغّل GPS من جديد
+  state.watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  state.timer=setInterval(tick,1000);
+  state.uploadTimer=setInterval(function(){uploadPos();saveActiveTrip();},10000);
+  startMsgPolling();
+  // حدّث الـ UI
+  document.getElementById('driver-name-inp').value=d.driverName;
+  document.getElementById('start-wrap').classList.add('hidden');
+  document.getElementById('stop-wrap').classList.remove('hidden');
+  document.getElementById('live-card').classList.remove('hidden');
+  document.getElementById('live-truck').textContent='🚚 '+state.truck+' — '+state.tt+' | '+d.driverName;
+  document.getElementById('setup-card').style.borderColor='rgba(0,212,170,.5)';
+  document.getElementById('subtitle').textContent='الرحلة مستمرة...';
+  // عرض بانر الاستئناف التلقائي ثم إخفاءه
+  var rb=document.getElementById('resume-banner');
+  if(rb){rb.style.display='block';setTimeout(function(){rb.style.display='none';},5000);}
+}
+
+function cancelResume(){
+  clearActiveTrip();
+  window._savedTrip=null;
+  document.getElementById('resume-banner').style.display='none';
+}
+
+// ============================================================
+// تحميل العربيات
+// ============================================================
+function loadTrucks(retries){
+  retries=retries||0;
+  fetch(FB+'/fleet_trucks.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      TRUCKS=Array.isArray(data)&&data.length?data:FALLBACK_TRUCKS;
+      buildTruckList();
+      document.getElementById('subtitle').textContent='اختر اسمك والعربية وابدأ الرحلة';
+    })
+    .catch(function(){
+      if(retries<2){setTimeout(function(){loadTrucks(retries+1);},2000);}
+      else{TRUCKS=FALLBACK_TRUCKS;buildTruckList();document.getElementById('subtitle').textContent='اختر اسمك والعربية وابدأ الرحلة';}
+    });
+}
+
+function buildTruckList(){
+  var sel=document.getElementById('truck-sel');
+  sel.innerHTML='<option value="">— اختر العربية —</option>';
+  TRUCKS.sort(function(a,b){return String(a.T).localeCompare(String(b.T),undefined,{numeric:true});});
+  TRUCKS.forEach(function(t){
+    var o=document.createElement('option');
+    o.value=t.T;o.setAttribute('data-tt',t.TT||'');o.setAttribute('data-cons',t.cons||9);
+    o.textContent='🚚 '+t.T+' — '+(t.TT||'');
+    sel.appendChild(o);
+  });
+  if(TRUCK_LOCK){sel.value=TRUCK_LOCK;sel.disabled=true;}
+}
+
+// استرجع الاسم المحفوظ
+(function(){
+  try{
+    var saved=localStorage.getItem('drv_name');
+    if(saved){document.getElementById('driver-name-inp').value=saved;document.getElementById('name-saved').style.display='block';}
+  }catch(_e){}
+})();
+
+// ============================================================
+// المسافة
+// ============================================================
+function haversine(la1,lo1,la2,lo2){
+  var R=6371,dL=(la2-la1)*Math.PI/180,dO=(lo2-lo1)*Math.PI/180;
+  var a=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dO/2)*Math.sin(dO/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ============================================================
+// بدء الرحلة
+// ============================================================
+function startTrip(){
+  var errEl=document.getElementById('err');errEl.style.display='none';
+  if(!navigator.geolocation){showErr('⚠️ المتصفح مش بيدعم GPS');return;}
+  var driverName=document.getElementById('driver-name-inp').value.trim();
+  if(!driverName){showErr('⚠️ اكتب اسمك');document.getElementById('driver-name-inp').focus();return;}
+  var sel=document.getElementById('truck-sel');
+  if(!sel.value){showErr('⚠️ اختر العربية');return;}
+  try{localStorage.setItem('drv_name',driverName);}catch(_e){}
+  document.getElementById('name-saved').style.display='block';
+  var opt=sel.options[sel.selectedIndex];
+  state.truck=sel.value;state.tt=opt.getAttribute('data-tt')||'';
+  state.cons=parseFloat(opt.getAttribute('data-cons'))||9;
+  state.driverName=driverName;
+  state.points=[];state.dist=0;state.startTime=Date.now();state.speed=0;
+  state.alertOn=false;state.lastLat=null;state.lastLng=null;state.active=true;state.violCount=0;state.lastViol=0;
+  saveActiveTrip();
+  state.watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  state.timer=setInterval(tick,1000);
+  state.uploadTimer=setInterval(function(){uploadPos();saveActiveTrip();},10000);
+  startMsgPolling();
+  document.getElementById('start-wrap').classList.add('hidden');
+  document.getElementById('stop-wrap').classList.remove('hidden');
+  document.getElementById('live-card').classList.remove('hidden');
+  document.getElementById('live-truck').textContent='🚚 '+state.truck+' — '+state.tt+' | '+driverName;
+  document.getElementById('setup-card').style.borderColor='rgba(0,212,170,.5)';
+}
+
+function showErr(msg){var el=document.getElementById('err');el.textContent=msg;el.style.display='block';}
+
+// ============================================================
+// GPS
+// ============================================================
+function onPos(pos){
+  var la=pos.coords.latitude,lo=pos.coords.longitude;
+  if(state.lastLat!==null){
+    var d=haversine(state.lastLat,state.lastLng,la,lo);
+    if(d>0.005&&d<2)state.dist+=d;
+  }
+  if(pos.coords.speed!=null&&pos.coords.speed>=0)state.speed=pos.coords.speed*3.6;
+  state.lastLat=la;state.lastLng=lo;
+  // تنبيه سرعة
+  if(state.speed>MAX_SPEED&&!state.alertOn){
+    state.alertOn=true;
+    state.violCount=(state.violCount||0)+1;
+    document.getElementById('alert-spd').textContent=Math.round(state.speed)+' كم/س';
+    document.getElementById('alert-lim').textContent='الحد: '+MAX_SPEED+' كم/س';
+
+    // رسالة الخصم حسب عدد المخالفات
+    var violMsg='';
+    var deductType='';
+    if(state.violCount===1){
+      violMsg='⚠️ تحذير أول — لو اتكرر هيتم خصم نص يوم من مرتبك!';
+      deductType='warning';
+    } else if(state.violCount===2){
+      violMsg='🔴 تجاوز السرعة مرة تانية — سيتم خصم نص يوم من مرتبك!';
+      deductType='half_day';
+    } else {
+      violMsg='🚨 تجاوز السرعة مرة '+state.violCount+' — سيتم خصم 3 أيام من مرتبك!';
+      deductType='three_days';
+    }
+    document.getElementById('alert-deduct-msg').textContent=violMsg;
+    document.getElementById('speed-alert').classList.add('show');
+    alertDriver('speed');
+
+    // إرسال المخالفة لـ Firebase مع عدد المخالفات وقيمة الخصم
+    var now=Date.now();
+    if(now-state.lastViol>20000){
+      state.lastViol=now;
+      var tk=state.truck.replace(/[^a-zA-Z0-9_]/g,'_');
+      var violData={
+        truck:state.truck,truckType:state.tt,driverName:state.driverName,
+        speed:Math.round(state.speed),limit:MAX_SPEED,ts:now,
+        violCount:state.violCount,deductType:deductType,
+        deductAmount:state.violCount===1?0:(state.violCount===2?0.5:3)
+      };
+      // سجّل في violations list (للمدير)
+      fetch(FB+'/gps_violations.json',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(violData)
+      }).catch(function(){});
+      // حدّث آخر مخالفة للعربية (للإشعار الفوري)
+      fetch(FB+'/gps_violations_latest/'+tk+'.json',{method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(violData)
+      }).catch(function(){});
+    }
+  } else if(state.speed<=MAX_SPEED&&state.alertOn){
+    state.alertOn=false;
+    document.getElementById('speed-alert').classList.remove('show');
+  }
+}
+
+function onErr(e){
+  var msgs={1:'⚠️ اسمح للمتصفح بالموقع',2:'⚠️ مفيش إشارة GPS',3:'⚠️ انتهى وقت الانتظار'};
+  showErr(msgs[e&&e.code]||'⚠️ خطأ في GPS');
+}
+
+// ============================================================
+// رفع الموقع
+// ============================================================
+function uploadPos(){
+  if(!state.truck||state.lastLat===null)return;
+  var tk=state.truck.replace(/[^a-zA-Z0-9_]/g,'_');
+  fetch(FB+'/gps_positions/'+tk+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      lat:state.lastLat,lng:state.lastLng,speed:Math.round(state.speed||0),
+      truck:state.truck,truckType:state.tt||'',driverName:state.driverName,
+      distanceKm:+state.dist.toFixed(2),cons:state.cons,
+      ts:Date.now(),active:true,speeding:state.speed>MAX_SPEED,startTime:state.startTime
+    })
+  }).catch(function(){});
+}
+
+// ============================================================
+// العداد
+// ============================================================
+function tick(){
+  if(!state.startTime)return;
+  var s=Math.floor((Date.now()-state.startTime)/1000);
+  var h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor((s%3600)/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
+  document.getElementById('live-dist').textContent=state.dist.toFixed(2);
+  document.getElementById('live-dur').textContent=h+':'+m+':'+ss;
+  document.getElementById('live-spd').textContent=Math.round(state.speed||0)+' كم/س';
+}
+
+// ============================================================
+// إنهاء الرحلة
+// ============================================================
+function stopTrip(){
+  if(state.watchId!==null)navigator.geolocation.clearWatch(state.watchId);
+  if(state.timer)clearInterval(state.timer);
+  if(state.uploadTimer)clearInterval(state.uploadTimer);
+  stopMsgPolling();
+  clearActiveTrip();
+  state.active=false;
+  var tk=(state.truck||'').replace(/[^a-zA-Z0-9_]/g,'_');
+  fetch(FB+'/gps_positions/'+tk+'/active.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:'false'}).catch(function(){});
+  if(state.dist>0.01){
+    var now=new Date(),endTime=Date.now();
+    var fp=13.75,fuelCost=state.cons>0?+((state.dist/state.cons)*fp).toFixed(2):0;
+    var _s=new Date(state.startTime).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    var _e=now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    var trip={id:'t'+Date.now(),truck:state.truck,truckType:state.tt||'',driverName:state.driverName,
+      date:now.toLocaleDateString('ar-EG'),startLabel:_s,endLabel:_e,start:_s,end:_e,
+      distanceKm:+state.dist.toFixed(2),cons:state.cons,fuelPrice:fp,cost:fuelCost,
+      startTime:state.startTime,endTime:endTime,durationHrs:+((endTime-state.startTime)/3600000).toFixed(2),ts:Date.now()};
+    trips.unshift(trip);
+    try{localStorage.setItem('drv_trips',JSON.stringify(trips.slice(0,50)));}catch(e){}
+    fetch(FB+'/gps_trips.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(trip)}).catch(function(){});
+  }
+  state={watchId:null,timer:null,uploadTimer:null,msgTimer:null,points:[],dist:0,startTime:null,speed:0,truck:null,tt:null,cons:9,driverName:'',alertOn:false,lastViol:0,lastLat:null,lastLng:null,active:false};
+  document.getElementById('start-wrap').classList.remove('hidden');
+  document.getElementById('stop-wrap').classList.add('hidden');
+  document.getElementById('live-card').classList.add('hidden');
+  document.getElementById('setup-card').style.borderColor='';
+  document.getElementById('speed-alert').classList.remove('show');
+  renderHistory();
+}
+
+function dismissAlert(){state.alertOn=false;document.getElementById('speed-alert').classList.remove('show');}
+
+// ============================================================
+// رسائل المدير — مسارين:
+// 1) /driver_commands/TRUCK_KEY/message  ← للعربية المحددة
+// 2) /driver_commands/broadcast          ← لكل السواقين
+// ============================================================
+var _lastMsgTs=0,_lastBcastTs=0,_lastMaxSpeed=MAX_SPEED;
+
+function startMsgPolling(){
+  stopMsgPolling();
+  pollMsgs();
+  state.msgTimer=setInterval(pollMsgs,2000); // كل 2 ثانية للسرعة
+}
+
+function pollMsgs(){
+  var tk=(state.truck||'').replace(/[^a-zA-Z0-9_]/g,'_');
+  Promise.all([
+    // رسالة للعربية
+    fetch(FB+'/driver_commands/'+tk+'.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;}),
+    // رسالة للكل
+    fetch(FB+'/driver_commands/broadcast.json',{cache:'no-store'}).then(function(r){return r.json();}).catch(function(){return null;})
+  ]).then(function(res){
+    var truckCmd=res[0]||{};
+    var bcast=res[1]||{};
+    // رسالة للعربية
+    if(truckCmd.message&&truckCmd.message.text){
+      var ts=truckCmd.message.ts||0;
+      if(ts>_lastMsgTs){
+        _lastMsgTs=ts;
+        showManagerMsg(truckCmd.message.text,'🚛 رسالة لعربيتك');
+        // علّم إنها اتقرأت
+        fetch(FB+'/driver_commands/'+tk+'/message/read.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:'true'}).catch(function(){});
+      }
+    }
+    // رسالة للكل
+    if(bcast.text&&bcast.ts){
+      if(bcast.ts>_lastBcastTs){
+        _lastBcastTs=bcast.ts;
+        showManagerMsg(bcast.text,'📢 رسالة للكل');
+      }
+    }
+    // تحديث حد السرعة من أمر مخصص للعربية
+    if(truckCmd.maxSpeed&&truckCmd.maxSpeed!==_lastMaxSpeed){
+      _lastMaxSpeed=truckCmd.maxSpeed;MAX_SPEED=truckCmd.maxSpeed;
+      showManagerMsg('🚦 تم تحديث حد السرعة إلى '+MAX_SPEED+' كم/س','⚙️ إعداد جديد');
+    }
+    // تحديث حد السرعة من broadcast للكل
+    if(bcast.maxSpeed&&bcast.maxSpeed!==MAX_SPEED&&(!truckCmd.maxSpeed||bcast.ts>=(truckCmd.ts||0))){
+      MAX_SPEED=bcast.maxSpeed;_lastMaxSpeed=bcast.maxSpeed;
+      showManagerMsg('🚦 تم تحديث حد السرعة إلى '+MAX_SPEED+' كم/س للأسطول','⚙️ إعداد جديد');
+    }
+  });
+}
+
+function stopMsgPolling(){
+  if(state.msgTimer)clearInterval(state.msgTimer);
+  state.msgTimer=null;
+}
+
+function showManagerMsg(text,label){
+  document.getElementById('manager-msg-text').textContent=text;
+  var lbl=document.querySelector('.msg-label');
+  if(lbl)lbl.textContent='📨 '+(label||'رسالة من المدير');
+  document.getElementById('manager-msg').style.display='block';
+  alertDriver('msg'); // صوت + هزاز
+}
+
+function dismissManagerMsg(){document.getElementById('manager-msg').style.display='none';}
+
+// ============================================================
+// سجل الرحلات
+// ============================================================
+function renderHistory(){
+  var el=document.getElementById('history-list');
+  if(!trips.length){el.innerHTML='<div class="loading">لسه مفيش رحلات</div>';return;}
+  el.innerHTML=trips.slice(0,20).map(function(t){
+    return '<div class="log-item">'+
+      '<strong style="color:#22d3ee">🚚 '+t.truck+' — '+t.truckType+'</strong>'+
+      (t.driverName?'<span style="color:#ffad33;font-size:11px;margin-right:8px"> | '+t.driverName+'</span>':'')+
+      '<span style="float:left;color:#8a9ab8;font-size:11px">'+t.date+'</span>'+
+      '<br><span style="color:#8a9ab8;font-size:11px">'+t.start+' ← '+t.end+'</span>'+
+      '&nbsp;&nbsp;<span style="color:#00d4aa;font-weight:700">'+t.distanceKm.toFixed(2)+' كم</span>'+
+      '</div>';
+  }).join('');
+}
+
+// ============================================================
+// تشغيل
+// ============================================================
+loadTrucks();
+renderHistory();
+checkSavedTrip(); // ← مهم: فحص لو في رحلة محفوظة
+</script>
+</body>
+</html>
