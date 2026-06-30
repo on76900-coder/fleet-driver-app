@@ -3511,6 +3511,9 @@ function renderCostAnalysis(){
     try{
       if(typeof syncFuelInputsFromUI==='function')syncFuelInputsFromUI();
       if(typeof syncKmCostInputsFromUI==='function')syncKmCostInputsFromUI();
+      var inp=document.getElementById('cur-month-label');
+      var monthLabel=inp?inp.value:'';
+      // حفظ محلي
       localStorage.setItem('fleet_D',JSON.stringify(D));
       localStorage.setItem('fleet_DRV',JSON.stringify(DRV));
       localStorage.setItem('fleet_NR_DATA',JSON.stringify(NR_DATA));
@@ -3519,11 +3522,34 @@ function renderCostAnalysis(){
       localStorage.setItem('fleet_fuelPrice',String(fuelPrice));
       localStorage.setItem('fleet_archivedMonths',JSON.stringify(ARCHIVED_MONTHS));
       localStorage.setItem('fleet_mtTypes',JSON.stringify(MT_TYPES));
-      var inp=document.getElementById('cur-month-label');
-      if(inp)localStorage.setItem('fleet_curMonthLabel',inp.value);
+      if(inp)localStorage.setItem('fleet_curMonthLabel',monthLabel);
+      // حفظ على Firebase
       var btn=document.getElementById('main-save-btn');
-      if(btn){var ob=btn.textContent;btn.textContent='✅ تم الحفظ';btn.style.background='rgba(0,212,170,.5)';setTimeout(function(){btn.textContent=ob;btn.style.background='rgba(0,212,170,.25)';},1800);}
-      toast('✅ تم حفظ جميع البيانات!');
+      if(btn){btn.textContent='⏳ جاري الحفظ...';btn.disabled=true;}
+      var payload={
+        fleet_D:D,
+        fleet_DRV:DRV,
+        fleet_NR_DATA:NR_DATA,
+        fleet_fuelInputs:fuelInputs,
+        fleet_kmCostInputs:kmCostInputs,
+        fleet_fuelPrice:fuelPrice,
+        fleet_archivedMonths:ARCHIVED_MONTHS,
+        fleet_mtTypes:MT_TYPES,
+        fleet_curMonthLabel:monthLabel,
+        _savedAt:Date.now(),
+        _savedBy:(_currentUser&&_currentUser.username)||'admin'
+      };
+      fetch(FB_URL+'/fleet_data.json',{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      }).then(function(){
+        if(btn){var ob='💾 حفظ';btn.textContent='✅ تم الحفظ';btn.style.background='rgba(0,212,170,.5)';btn.disabled=false;setTimeout(function(){btn.textContent=ob;btn.style.background='rgba(0,212,170,.25)';},2000);}
+        toast('✅ تم الحفظ على Firebase — متزامن على كل الأجهزة!');
+      }).catch(function(){
+        if(btn){btn.textContent='💾 حفظ';btn.disabled=false;}
+        toast('⚠️ Firebase فشل — تم الحفظ محلياً فقط');
+      });
     }catch(ex){alert('تعذر الحفظ: '+ex.message);}
   }
   // ==================== MANAGER LIVE MAP (ENHANCED) ====================
@@ -3974,13 +4000,49 @@ function renderCostAnalysis(){
   }
   // ==================== END DRIVER MESSAGING ====================
 
+  function _applyData(data){
+    try{if(Array.isArray(data.fleet_D)&&data.fleet_D.length){D.length=0;data.fleet_D.forEach(function(r){D.push(r);});F=[...D];}}catch(_e){}
+    try{if(Array.isArray(data.fleet_DRV)&&data.fleet_DRV.length){DRV.length=0;data.fleet_DRV.forEach(function(r){DRV.push(r);});}}catch(_e){}
+    try{if(Array.isArray(data.fleet_NR_DATA)&&data.fleet_NR_DATA.length){NR_DATA.length=0;data.fleet_NR_DATA.forEach(function(r){NR_DATA.push(r);});}}catch(_e){}
+    try{if(data.fleet_fuelInputs)Object.keys(data.fleet_fuelInputs).forEach(function(k){fuelInputs[k]=data.fleet_fuelInputs[k];});}catch(_e){}
+    try{if(data.fleet_kmCostInputs)Object.keys(data.fleet_kmCostInputs).forEach(function(k){kmCostInputs[k]=data.fleet_kmCostInputs[k];});}catch(_e){}
+    try{if(data.fleet_fuelPrice)fuelPrice=parseFloat(data.fleet_fuelPrice)||0;}catch(_e){}
+    try{if(Array.isArray(data.fleet_archivedMonths))ARCHIVED_MONTHS=data.fleet_archivedMonths;}catch(_e){}
+    try{if(data.fleet_mtTypes)Object.keys(data.fleet_mtTypes).forEach(function(k){MT_TYPES[k]=data.fleet_mtTypes[k];});}catch(_e){}
+    try{if(data.fleet_curMonthLabel){var _mi=document.getElementById('cur-month-label');if(_mi)_mi.value=data.fleet_curMonthLabel;}}catch(_e){}
+  }
+
   function loadAllSavedData(){
     if(READONLY)return;
+    // أولاً حمّل من localStorage كـ fallback سريع
     try{var _d=localStorage.getItem('fleet_D');if(_d){var _dp=JSON.parse(_d);if(Array.isArray(_dp)&&_dp.length){D.length=0;_dp.forEach(function(r){D.push(r);});F=[...D];}}}catch(_e){}
     try{var _drv=localStorage.getItem('fleet_DRV');if(_drv){var _dp2=JSON.parse(_drv);if(Array.isArray(_dp2)&&_dp2.length){DRV.length=0;_dp2.forEach(function(r){DRV.push(r);});}}}catch(_e){}
     try{var _nr=localStorage.getItem('fleet_NR_DATA');if(_nr){var _np=JSON.parse(_nr);if(Array.isArray(_np)&&_np.length){NR_DATA.length=0;_np.forEach(function(r){NR_DATA.push(r);});}}}catch(_e){}
     try{var _ml=localStorage.getItem('fleet_curMonthLabel');if(_ml){var _mi=document.getElementById('cur-month-label');if(_mi)_mi.value=_ml;}}catch(_e){}
     try{var _mt=localStorage.getItem('fleet_mtTypes');if(_mt){var _mto=JSON.parse(_mt);Object.keys(_mto).forEach(function(k){MT_TYPES[k]=_mto[k];});}}catch(_e){}
+    // بعدين حمّل من Firebase وحدّث لو في بيانات أحدث
+    fetch(FB_URL+'/fleet_data.json',{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(!data||typeof data!=='object')return;
+        // قارن التوقيت — Firebase دايماً أحدث أو مساوي
+        var fbTime=data._savedAt||0;
+        var localTime=parseInt(localStorage.getItem('fleet_lastSave')||'0');
+        _applyData(data);
+        // حفظ في localStorage كـ cache
+        try{
+          localStorage.setItem('fleet_D',JSON.stringify(D));
+          localStorage.setItem('fleet_DRV',JSON.stringify(DRV));
+          localStorage.setItem('fleet_lastSave',String(fbTime));
+        }catch(_e){}
+        // أعد رسم الداشبورد
+        if(typeof applyFilters==='function')applyFilters();
+        if(typeof renderDrvPage==='function')renderDrvPage();
+        toast('✅ تم تحميل أحدث بيانات من Firebase');
+      })
+      .catch(function(){
+        // Firebase فشل — استمر بالـ localStorage
+      });
   }
 
   // ===================== GPS LIVE TRACKING =====================
