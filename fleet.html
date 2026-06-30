@@ -4013,35 +4013,38 @@ function renderCostAnalysis(){
   }
 
   function loadAllSavedData(){
-    if(READONLY)return;
-    // أولاً حمّل من localStorage كـ fallback سريع
-    try{var _d=localStorage.getItem('fleet_D');if(_d){var _dp=JSON.parse(_d);if(Array.isArray(_dp)&&_dp.length){D.length=0;_dp.forEach(function(r){D.push(r);});F=[...D];}}}catch(_e){}
-    try{var _drv=localStorage.getItem('fleet_DRV');if(_drv){var _dp2=JSON.parse(_drv);if(Array.isArray(_dp2)&&_dp2.length){DRV.length=0;_dp2.forEach(function(r){DRV.push(r);});}}}catch(_e){}
-    try{var _nr=localStorage.getItem('fleet_NR_DATA');if(_nr){var _np=JSON.parse(_nr);if(Array.isArray(_np)&&_np.length){NR_DATA.length=0;_np.forEach(function(r){NR_DATA.push(r);});}}}catch(_e){}
-    try{var _ml=localStorage.getItem('fleet_curMonthLabel');if(_ml){var _mi=document.getElementById('cur-month-label');if(_mi)_mi.value=_ml;}}catch(_e){}
-    try{var _mt=localStorage.getItem('fleet_mtTypes');if(_mt){var _mto=JSON.parse(_mt);Object.keys(_mto).forEach(function(k){MT_TYPES[k]=_mto[k];});}}catch(_e){}
-    // بعدين حمّل من Firebase وحدّث لو في بيانات أحدث
+    // localStorage — للأدمن بس (على نفس الجهاز)
+    if(!READONLY){
+      try{var _d=localStorage.getItem('fleet_D');if(_d){var _dp=JSON.parse(_d);if(Array.isArray(_dp)&&_dp.length){D.length=0;_dp.forEach(function(r){D.push(r);});F=[...D];}}}catch(_e){}
+      try{var _drv=localStorage.getItem('fleet_DRV');if(_drv){var _dp2=JSON.parse(_drv);if(Array.isArray(_dp2)&&_dp2.length){DRV.length=0;_dp2.forEach(function(r){DRV.push(r);});}}}catch(_e){}
+      try{var _nr=localStorage.getItem('fleet_NR_DATA');if(_nr){var _np=JSON.parse(_nr);if(Array.isArray(_np)&&_np.length){NR_DATA.length=0;_np.forEach(function(r){NR_DATA.push(r);});}}}catch(_e){}
+      try{var _ml=localStorage.getItem('fleet_curMonthLabel');if(_ml){var _mi=document.getElementById('cur-month-label');if(_mi)_mi.value=_ml;}}catch(_e){}
+      try{var _mt=localStorage.getItem('fleet_mtTypes');if(_mt){var _mto=JSON.parse(_mt);Object.keys(_mto).forEach(function(k){MT_TYPES[k]=_mto[k];});}}catch(_e){}
+    }
+    // Firebase — للكل (أدمن + يوزر عادي)
     fetch(FB_URL+'/fleet_data.json',{cache:'no-store'})
       .then(function(r){return r.json();})
       .then(function(data){
         if(!data||typeof data!=='object')return;
-        // قارن التوقيت — Firebase دايماً أحدث أو مساوي
-        var fbTime=data._savedAt||0;
-        var localTime=parseInt(localStorage.getItem('fleet_lastSave')||'0');
         _applyData(data);
-        // حفظ في localStorage كـ cache
-        try{
-          localStorage.setItem('fleet_D',JSON.stringify(D));
-          localStorage.setItem('fleet_DRV',JSON.stringify(DRV));
-          localStorage.setItem('fleet_lastSave',String(fbTime));
-        }catch(_e){}
+        // كاش محلي للأدمن بس
+        if(!READONLY){
+          try{
+            localStorage.setItem('fleet_D',JSON.stringify(D));
+            localStorage.setItem('fleet_DRV',JSON.stringify(DRV));
+            localStorage.setItem('fleet_lastSave',String(data._savedAt||0));
+          }catch(_e){}
+        }
         // أعد رسم الداشبورد
         if(typeof applyFilters==='function')applyFilters();
         if(typeof renderDrvPage==='function')renderDrvPage();
-        toast('✅ تم تحميل أحدث بيانات من Firebase');
+        if(data._savedAt){
+          var t=new Date(data._savedAt).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+          toast('✅ بيانات محدثة — آخر حفظ: '+t+(data._savedBy?' بواسطة '+data._savedBy:''));
+        }
       })
       .catch(function(){
-        // Firebase فشل — استمر بالـ localStorage
+        if(READONLY)toast('⚠️ تعذر تحميل البيانات، تحقق من الاتصال');
       });
   }
 
